@@ -57,7 +57,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker-compose pull 
             sudo docker-compose stop
             sudo docker-compose rm web
             touch .env
@@ -67,7 +66,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-
+            sudo docker-compose pull # Это нужно? логиниться?
             sudo docker-compose up -d
 
   send_message:
