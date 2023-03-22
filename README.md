@@ -12,4 +12,6 @@
 - выполнить команду для дампа текущей базы данных```docker-compose exec web python manage.py dumpdata > fixtures.json```
 - копировать базу данных в папку /api_yamdb/
 - заполнить базу данных из дампа командой ```docker-compose exec web python manage.py loaddata fixtures.json```
+
+
 ![worflow status badge](https://github.com/elhombreinvisible/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
