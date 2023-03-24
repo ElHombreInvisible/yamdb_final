@@ -5,7 +5,6 @@ on: [push]
 jobs:
   tests:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -15,6 +14,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        echo "branch=$(echo ${GITHUB_REF#refs/heads/})"
         python -m pip install --upgrade pip 
         pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
         cd api_yamdb/
@@ -46,12 +46,9 @@ jobs:
             context: api_yamdb/
             push: true
             tags: ${{ secrets.DOCKER_USERNAME }}/yamdb:latest
-
+  
   deploy:
-    on:
-      push:
-        branches:
-        - main
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
     steps:
@@ -64,7 +61,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker-compose stop
-            sudo docker-compose rm web
+            sudo docker-compose rm -f web
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
@@ -72,10 +69,9 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker-compose pull 
             sudo docker-compose up -d
-            sudo docker-compose exec web python manage.py migrate # или это может повлиять на БД?
-            sudo docker-compose exec web python manage.py collectstatic --no-input
+            sudo docker-compose exec -T web python manage.py migrate # или это может повлиять на БД?
+            sudo docker-compose exec -T web python manage.py collectstatic --no-input
 
   send_message:
     runs-on: ubuntu-latest
